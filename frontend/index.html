@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Consulta BB</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+    <h1>Consulta BB – FPM / Royalties</h1>
+
+    <form id="consultaForm">
+      <input type="text" id="codigo" placeholder="Código do Município" required />
+      <input type="text" id="nome" placeholder="Nome do Município" required />
+      <input type="text" id="uf" placeholder="UF" maxlength="2" required />
+
+      <input type="text" id="data_inicio" placeholder="Data início (DD.MM.AAAA)" required />
+      <input type="text" id="data_fim" placeholder="Data fim (DD.MM.AAAA)" required />
+
+      <button type="submit">Consultar</button>
+    </form>
+
+    <h2>Resultado</h2>
+    <pre id="resultado">Nenhuma consulta realizada.</pre>
+
+    <h2>Histórico</h2>
+    <ul id="historico"></ul>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
