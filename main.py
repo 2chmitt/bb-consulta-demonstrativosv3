@@ -1,23 +1,39 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import requests
 import urllib3
 import re
+import os
 
 urllib3.disable_warnings()
 
 app = FastAPI()
 
-# -------- CORS (OBRIGATÓRIO PARA FRONTEND) ----------
+# -------- CORS ----------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # depois você pode restringir
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# -------- CONFIG ----------
+# -------- SERVIR FRONTEND ----------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app.mount(
+    "/frontend",
+    StaticFiles(directory=os.path.join(BASE_DIR, "frontend")),
+    name="frontend"
+)
+
+@app.get("/")
+def home():
+    return FileResponse(os.path.join(BASE_DIR, "frontend", "index.html"))
+
+# -------- CONFIG BB ----------
 URL_BB = "https://demonstrativos.api.daf.bb.com.br/v1/demonstrativo/daf/consulta"
 
 HEADERS = {
@@ -53,8 +69,6 @@ def consultar_bb(codigo, fundo, data_inicio, data_fim):
     )
 
     return r.json() if r.status_code == 200 else {}
-print("PAYLOAD FINAL BB:", consultar_bb)
-
 
 def extrair_credito_benef(json_data):
     if not json_data:
@@ -77,20 +91,41 @@ def extrair_credito_benef(json_data):
 @app.post("/consulta")
 def consultar(consulta: Consulta):
 
+    if consulta.codigo <= 0:
+        return {
+            "erro": "Código do beneficiário inválido",
+            "codigo_recebido": consulta.codigo
+        }
+
     CODIGO_FPM = 4
     CODIGO_ROYALTIES = 28
     CODIGO_TODOS = 0
 
     fpm = extrair_credito_benef(
-        consultar_bb(consulta.codigo, CODIGO_FPM, consulta.data_inicio, consulta.data_fim)
+        consultar_bb(
+            consulta.codigo,
+            CODIGO_FPM,
+            consulta.data_inicio,
+            consulta.data_fim
+        )
     )
 
     royalties = extrair_credito_benef(
-        consultar_bb(consulta.codigo, CODIGO_ROYALTIES, consulta.data_inicio, consulta.data_fim)
+        consultar_bb(
+            consulta.codigo,
+            CODIGO_ROYALTIES,
+            consulta.data_inicio,
+            consulta.data_fim
+        )
     )
 
     todos = extrair_credito_benef(
-        consultar_bb(consulta.codigo, CODIGO_TODOS, consulta.data_inicio, consulta.data_fim)
+        consultar_bb(
+            consulta.codigo,
+            CODIGO_TODOS,
+            consulta.data_inicio,
+            consulta.data_fim
+        )
     )
 
     return {
