@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000/consulta";
+const API_URL = "/consulta";
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -80,3 +80,4 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 });
+
