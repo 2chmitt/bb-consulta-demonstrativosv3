@@ -12,7 +12,9 @@ urllib3.disable_warnings()
 
 app = FastAPI()
 
-# -------- CORS ----------
+# =========================
+# CORS
+# =========================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # depois você pode restringir
@@ -20,20 +22,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -------- SERVIR FRONTEND ----------
+# =========================
+# PATHS ABSOLUTOS (RENDER)
+# =========================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 
+# Logs para confirmar no Render
+print("BASE_DIR:", BASE_DIR)
+print("FRONTEND_DIR:", FRONTEND_DIR)
+print("FRONTEND EXISTS:", os.path.isdir(FRONTEND_DIR))
+
+# =========================
+# ARQUIVOS ESTÁTICOS
+# =========================
 app.mount(
-    "/frontend",
-    StaticFiles(directory=os.path.join(BASE_DIR, "frontend")),
-    name="frontend"
+    "/static",
+    StaticFiles(directory=FRONTEND_DIR),
+    name="static"
 )
 
+# =========================
+# HOME
+# =========================
 @app.get("/")
 def home():
-    return FileResponse(os.path.join(BASE_DIR, "frontend", "index.html"))
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
 
-# -------- CONFIG BB ----------
+# =========================
+# CONFIG BB
+# =========================
 URL_BB = "https://demonstrativos.api.daf.bb.com.br/v1/demonstrativo/daf/consulta"
 
 HEADERS = {
@@ -43,7 +61,9 @@ HEADERS = {
     "Referer": "https://demonstrativos.apps.bb.com.br/"
 }
 
-# -------- MODELS ----------
+# =========================
+# MODELS
+# =========================
 class Consulta(BaseModel):
     codigo: int
     nome: str
@@ -51,7 +71,9 @@ class Consulta(BaseModel):
     data_inicio: str
     data_fim: str
 
-# -------- FUNÇÕES ----------
+# =========================
+# FUNÇÕES
+# =========================
 def consultar_bb(codigo, fundo, data_inicio, data_fim):
     payload = {
         "codigoBeneficiario": codigo,
@@ -87,7 +109,9 @@ def extrair_credito_benef(json_data):
                 )
     return 0.0
 
-# -------- ENDPOINT ----------
+# =========================
+# ENDPOINT
+# =========================
 @app.post("/consulta")
 def consultar(consulta: Consulta):
 
