@@ -1,40 +1,105 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #f2f2f2;
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f4f6f8;
+  color: #333;
 }
 
-.container {
-  max-width: 700px;
+.topbar {
+  background: #0033a0;
+  color: #fff;
+  padding: 16px 24px;
+}
+
+.page {
+  max-width: 900px;
   margin: 30px auto;
-  background: white;
-  padding: 20px;
+  padding: 0 15px;
+}
+
+.card {
+  background: #fff;
   border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
-form {
-  display: grid;
-  gap: 10px;
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
 }
 
-input, button {
-  padding: 8px;
+label {
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #555;
+}
+
+input {
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
   font-size: 14px;
 }
 
+input:focus {
+  outline: none;
+  border-color: #0033a0;
+}
+
+.actions {
+  text-align: right;
+}
+
 button {
+  background: #0033a0;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 4px;
+  font-size: 14px;
   cursor: pointer;
 }
 
-#resultado {
-  background: #111;
-  color: #0f0;
-  padding: 10px;
-  white-space: pre-wrap;
+button:hover {
+  background: #00257a;
 }
 
-li {
-  background: #eee;
-  margin: 5px 0;
-  padding: 5px;
+.resultado-card div {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.resultado-card ul {
+  margin-top: 10px;
+  padding-left: 18px;
+}
+
+.resultado-card li {
+  margin-bottom: 6px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+#historico li {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
   cursor: pointer;
+}
+
+#historico li:hover {
+  background: #f0f3f7;
+}
+
+.footer {
+  text-align: center;
+  padding: 15px;
+  font-size: 12px;
+  color: #777;
 }
