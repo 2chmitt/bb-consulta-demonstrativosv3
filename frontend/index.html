@@ -2,51 +2,93 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Demonstrativos do GabrielPatinhos22</title>
+  <title>Demonstrativos do Gabriel Patinhos22</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
 
 <header class="topbar">
   <div class="topbar-content">
-    <img src="/static/imagem1.png" alt="Logo" class="logo" />
-    <h1>Demonstrativos do GabrielPatinhos22</h1>
+    <img src="/static/imagem1.png" class="logo" alt="Logo" />
+    <h1>Demonstrativos da Equipe Técnica</h1>
   </div>
 </header>
 
 <main class="page">
 
+  <!-- FORMULÁRIO -->
   <section class="card form-card">
     <form id="consultaForm">
 
       <div class="field autocomplete">
         <label>Município</label>
-        <input type="text" id="municipioInput" autocomplete="off" required />
+        <input type="text" id="municipioInput" autocomplete="off" placeholder="Digite o nome do município..." />
         <ul id="sugestoes" class="sugestoes"></ul>
       </div>
 
+      <input type="hidden" id="codigoMunicipio" />
+      <input type="hidden" id="ufMunicipio" />
+
       <div class="field">
         <label>Data inicial</label>
-        <input type="date" id="data_inicio" required />
+        <input type="date" id="data_inicio" />
       </div>
 
       <div class="field">
         <label>Data final</label>
-        <input type="date" id="data_fim" required />
+        <input type="date" id="data_fim" />
       </div>
 
       <div class="actions">
-        <button type="submit">Consultar</button>
+        <button type="submit" id="btnConsultar">Consultar</button>
       </div>
 
+      <!-- STATUS -->
+      <div id="status" class="status hidden">Consultando dados…</div>
     </form>
   </section>
 
+  <!-- RESULTADO -->
   <section class="card resultado-card">
     <h2>Resultado</h2>
-    <div id="resultado">Nenhuma consulta realizada.</div>
+
+    <div class="linha-info">
+      <strong>Município:</strong>
+      <span id="res-municipio">—</span>
+    </div>
+
+    <div class="linha-info">
+      <strong>Período:</strong>
+      <span id="res-periodo">—</span>
+    </div>
+
+    <div class="bloco-valor">
+      <div class="bloco-left">
+        <span class="chave">fpm:</span>
+        <span id="valor-fpm" class="valor">—</span>
+      </div>
+      <button class="btn-copy" data-copy="valor-fpm">📋 Copiar</button>
+    </div>
+
+    <div class="bloco-valor">
+      <div class="bloco-left">
+        <span class="chave">royalties:</span>
+        <span id="valor-royalties" class="valor">—</span>
+      </div>
+      <button class="btn-copy" data-copy="valor-royalties">📋 Copiar</button>
+    </div>
+
+    <div class="bloco-valor">
+      <div class="bloco-left">
+        <span class="chave">todos:</span>
+        <span id="valor-todos" class="valor">—</span>
+      </div>
+      <button class="btn-copy" data-copy="valor-todos">📋 Copiar</button>
+    </div>
+
   </section>
 
+  <!-- HISTÓRICO -->
   <section class="card historico-card">
     <h2>Histórico <span class="hint">(clique para visualizar)</span></h2>
     <ul id="historico"></ul>
