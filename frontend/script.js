@@ -1,4 +1,20 @@
+// ✅ Caminho relativo = funciona local e online
 const API_URL = "/consulta";
+
+// Converte YYYY-MM-DD → DD.MM.AAAA
+function isoParaPonto(dataIso) {
+  if (!dataIso) return null;
+  const [ano, mes, dia] = dataIso.split("-");
+  return `${dia}.${mes}.${ano}`;
+}
+
+// Formata número para Real
+function formatarReal(valor) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  }).format(valor);
+}
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -15,22 +31,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const codigo = document.getElementById("codigo").value.trim();
     const nome = document.getElementById("nome").value.trim();
     const uf = document.getElementById("uf").value.trim().toUpperCase();
-    const dataInicio = document.getElementById("data_inicio").value.trim();
-    const dataFim = document.getElementById("data_fim").value.trim();
 
-    // 🔒 Validações
+    const dataInicioIso = document.getElementById("data_inicio").value;
+    const dataFimIso = document.getElementById("data_fim").value;
+
+    const dataInicio = isoParaPonto(dataInicioIso);
+    const dataFim = isoParaPonto(dataFimIso);
+
     if (!/^\d+$/.test(codigo)) {
       alert("Código do município inválido");
       return;
     }
 
-    if (!/^\d{2}\.\d{2}\.\d{4}$/.test(dataInicio)) {
-      alert("Data início inválida. Use DD.MM.AAAA");
-      return;
-    }
-
-    if (!/^\d{2}\.\d{2}\.\d{4}$/.test(dataFim)) {
-      alert("Data fim inválida. Use DD.MM.AAAA");
+    if (!dataInicio || !dataFim) {
+      alert("Selecione corretamente as datas");
       return;
     }
 
@@ -42,7 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
       data_fim: dataFim
     };
 
-    console.log("PAYLOAD ENVIADO AO BACKEND:", payload);
     resultado.textContent = "Consultando...";
 
     try {
@@ -53,9 +66,18 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const data = await res.json();
-      resultado.textContent = JSON.stringify(data, null, 2);
 
-      // 💾 salva no histórico
+      resultado.innerHTML = `
+        <div><strong>Município:</strong> ${data.municipio}</div>
+        <div><strong>Período:</strong> ${data.periodo}</div>
+
+        <ul>
+          <li><strong>FPM:</strong> ${formatarReal(data.fpm)}</li>
+          <li><strong>Royalties:</strong> ${formatarReal(data.royalties)}</li>
+          <li><strong>Todos os Benefícios:</strong> ${formatarReal(data.todos)}</li>
+        </ul>
+      `;
+
       historico.unshift(data);
       localStorage.setItem("historico", JSON.stringify(historico));
       renderHistorico();
@@ -69,15 +91,22 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderHistorico() {
     historicoEl.innerHTML = "";
 
-    historico.forEach((item) => {
+    historico.forEach(item => {
       const li = document.createElement("li");
       li.textContent = `${item.municipio} | ${item.periodo}`;
       li.onclick = () => {
-        resultado.textContent = JSON.stringify(item, null, 2);
+        resultado.innerHTML = `
+          <div><strong>Município:</strong> ${item.municipio}</div>
+          <div><strong>Período:</strong> ${item.periodo}</div>
+
+          <ul>
+            <li><strong>FPM:</strong> ${formatarReal(item.fpm)}</li>
+            <li><strong>Royalties:</strong> ${formatarReal(item.royalties)}</li>
+            <li><strong>Todos os Benefícios:</strong> ${formatarReal(item.todos)}</li>
+          </ul>
+        `;
       };
       historicoEl.appendChild(li);
     });
   }
-
 });
-
