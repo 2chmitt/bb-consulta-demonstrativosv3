@@ -2,69 +2,62 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Demonstrativos DAF – Consulta</title>
+  <title>Demonstrativos do GabrielPatinhos22</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
 
-  <header class="topbar">
-    <h1>Consulta Equipe Técnica - BB</h1>
-  </header>
+<header class="topbar">
+  <div class="topbar-content">
+    <img src="/static/imagem1.png" alt="Logo" class="logo" />
+    <h1>Demonstrativos do GabrielPatinhos22</h1>
+  </div>
+</header>
 
-  <main class="page">
+<main class="page">
 
-    <section class="card">
-      <form id="consultaForm">
+  <section class="card form-card">
+    <form id="consultaForm">
 
-        <div class="field">
-          <label>Código do Município</label>
-          <input type="text" id="codigo" required />
-        </div>
+      <div class="field autocomplete">
+        <label>Município</label>
+        <input type="text" id="municipioInput" autocomplete="off" required />
+        <ul id="sugestoes" class="sugestoes"></ul>
+      </div>
 
-        <div class="field">
-          <label>Nome do Município</label>
-          <input type="text" id="nome" required />
-        </div>
+      <div class="field">
+        <label>Data inicial</label>
+        <input type="date" id="data_inicio" required />
+      </div>
 
-        <div class="field">
-          <label>UF</label>
-          <input type="text" id="uf" maxlength="2" required />
-        </div>
+      <div class="field">
+        <label>Data final</label>
+        <input type="date" id="data_fim" required />
+      </div>
 
-        <div class="field">
-          <label>Data inicial</label>
-          <input type="date" id="data_inicio" required />
-        </div>
+      <div class="actions">
+        <button type="submit">Consultar</button>
+      </div>
 
-        <div class="field">
-          <label>Data final</label>
-          <input type="date" id="data_fim" required />
-        </div>
+    </form>
+  </section>
 
-        <div class="actions">
-          <button type="submit">Consultar</button>
-        </div>
+  <section class="card resultado-card">
+    <h2>Resultado</h2>
+    <div id="resultado">Nenhuma consulta realizada.</div>
+  </section>
 
-      </form>
-    </section>
+  <section class="card historico-card">
+    <h2>Histórico <span class="hint">(clique para visualizar)</span></h2>
+    <ul id="historico"></ul>
+  </section>
 
-    <section class="card resultado-card">
-      <h2>Resultado</h2>
-      <div id="resultado">Nenhuma consulta realizada.</div>
-    </section>
+</main>
 
-    <section class="card">
-      <h2>Histórico</h2>
-      <ul id="historico"></ul>
-    </section>
+<footer class="footer">
+  © copyright by <strong>gabrielpatinhos22</strong>
+</footer>
 
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    © copyright by <strong>gabrielpatinhos22</strong>
-  </footer>
-
-  <script src="/static/script.js"></script>
+<script src="/static/script.js"></script>
 </body>
 </html>
