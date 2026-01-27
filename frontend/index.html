@@ -2,33 +2,69 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Consulta BB</title>
+  <title>Demonstrativos DAF – Consulta</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
 
-  <div class="container">
-    <h1>Consulta BB – FPM / Royalties</h1>
+  <header class="topbar">
+    <h1>Consulta Equipe Técnica - BB</h1>
+  </header>
 
-    <form id="consultaForm">
-      <input type="text" id="codigo" placeholder="Código do Município" required />
-      <input type="text" id="nome" placeholder="Nome do Município" required />
-      <input type="text" id="uf" placeholder="UF" maxlength="2" required />
+  <main class="page">
 
-      <input type="text" id="data_inicio" placeholder="Data início (DD.MM.AAAA)" required />
-      <input type="text" id="data_fim" placeholder="Data fim (DD.MM.AAAA)" required />
+    <section class="card">
+      <form id="consultaForm">
 
-      <button type="submit">Consultar</button>
-    </form>
+        <div class="field">
+          <label>Código do Município</label>
+          <input type="text" id="codigo" required />
+        </div>
 
-    <h2>Resultado</h2>
-    <pre id="resultado">Nenhuma consulta realizada.</pre>
+        <div class="field">
+          <label>Nome do Município</label>
+          <input type="text" id="nome" required />
+        </div>
 
-    <h2>Histórico</h2>
-    <ul id="historico"></ul>
-  </div>
+        <div class="field">
+          <label>UF</label>
+          <input type="text" id="uf" maxlength="2" required />
+        </div>
+
+        <div class="field">
+          <label>Data inicial</label>
+          <input type="date" id="data_inicio" required />
+        </div>
+
+        <div class="field">
+          <label>Data final</label>
+          <input type="date" id="data_fim" required />
+        </div>
+
+        <div class="actions">
+          <button type="submit">Consultar</button>
+        </div>
+
+      </form>
+    </section>
+
+    <section class="card resultado-card">
+      <h2>Resultado</h2>
+      <div id="resultado">Nenhuma consulta realizada.</div>
+    </section>
+
+    <section class="card">
+      <h2>Histórico</h2>
+      <ul id="historico"></ul>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    © copyright by <strong>gabrielpatinhos22</strong>
+  </footer>
 
   <script src="/static/script.js"></script>
 </body>
 </html>
-
