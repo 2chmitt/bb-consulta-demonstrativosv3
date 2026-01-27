@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -7,6 +7,7 @@ import requests
 import urllib3
 import re
 import os
+import json
 
 urllib3.disable_warnings()
 
@@ -17,24 +18,26 @@ app = FastAPI()
 # =========================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # depois você pode restringir
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # =========================
-# PATHS ABSOLUTOS (RENDER)
+# PATHS
 # =========================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
-
-# Logs para confirmar no Render
-print("BASE_DIR:", BASE_DIR)
-print("FRONTEND_DIR:", FRONTEND_DIR)
-print("FRONTEND EXISTS:", os.path.isdir(FRONTEND_DIR))
+FRONTEND_DIR = os.path.join(BASE_DIR, "Frontend")
+MUNICIPIOS_PATH = os.path.join(BASE_DIR, "municipios.json")
 
 # =========================
-# ARQUIVOS ESTÁTICOS
+# LOAD MUNICIPIOS
+# =========================
+with open(MUNICIPIOS_PATH, encoding="utf-8") as f:
+    MUNICIPIOS = json.load(f)
+
+# =========================
+# STATIC FILES
 # =========================
 app.mount(
     "/static",
@@ -48,6 +51,25 @@ app.mount(
 @app.get("/")
 def home():
     return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+
+# =========================
+# ENDPOINT AUTOCOMPLETE
+# =========================
+@app.get("/municipios")
+def buscar_municipios(q: str = Query(min_length=2)):
+    q = q.upper()
+
+    resultados = [
+        {
+            "codigo": m["codigoBeneficiarioSaida"],
+            "municipio": m["nomeBeneficiarioSaida"],
+            "uf": m["siglaUnidadeFederacaoSaida"]
+        }
+        for m in MUNICIPIOS
+        if q in m["nomeBeneficiarioSaida"].upper()
+    ][:10]
+
+    return resultados
 
 # =========================
 # CONFIG BB
@@ -72,7 +94,7 @@ class Consulta(BaseModel):
     data_fim: str
 
 # =========================
-# FUNÇÕES
+# FUNÇÕES BB
 # =========================
 def consultar_bb(codigo, fundo, data_inicio, data_fim):
     payload = {
@@ -98,7 +120,6 @@ def extrair_credito_benef(json_data):
 
     for item in json_data.get("quantidadeOcorrencia", []):
         nome = item.get("nomeBeneficio", "")
-
         if "CREDITO BENEF." in nome:
             match = re.search(r'(\d{1,3}(?:\.\d{3})*,\d{2})C', nome)
             if match:
@@ -110,46 +131,25 @@ def extrair_credito_benef(json_data):
     return 0.0
 
 # =========================
-# ENDPOINT
+# CONSULTA
 # =========================
 @app.post("/consulta")
 def consultar(consulta: Consulta):
-
-    if consulta.codigo <= 0:
-        return {
-            "erro": "Código do beneficiário inválido",
-            "codigo_recebido": consulta.codigo
-        }
 
     CODIGO_FPM = 4
     CODIGO_ROYALTIES = 28
     CODIGO_TODOS = 0
 
     fpm = extrair_credito_benef(
-        consultar_bb(
-            consulta.codigo,
-            CODIGO_FPM,
-            consulta.data_inicio,
-            consulta.data_fim
-        )
+        consultar_bb(consulta.codigo, CODIGO_FPM, consulta.data_inicio, consulta.data_fim)
     )
 
     royalties = extrair_credito_benef(
-        consultar_bb(
-            consulta.codigo,
-            CODIGO_ROYALTIES,
-            consulta.data_inicio,
-            consulta.data_fim
-        )
+        consultar_bb(consulta.codigo, CODIGO_ROYALTIES, consulta.data_inicio, consulta.data_fim)
     )
 
     todos = extrair_credito_benef(
-        consultar_bb(
-            consulta.codigo,
-            CODIGO_TODOS,
-            consulta.data_inicio,
-            consulta.data_fim
-        )
+        consultar_bb(consulta.codigo, CODIGO_TODOS, consulta.data_inicio, consulta.data_fim)
     )
 
     return {
