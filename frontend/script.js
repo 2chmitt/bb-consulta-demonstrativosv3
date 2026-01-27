@@ -1,12 +1,13 @@
 const API_URL = "/consulta";
 
-// ===== util =====
+// YYYY-MM-DD → DD.MM.AAAA
 function isoParaPonto(dataIso) {
-  if (!dataIso) return null;
+  if (!dataIso) return "";
   const [ano, mes, dia] = dataIso.split("-");
   return `${dia}.${mes}.${ano}`;
 }
 
+// Número → R$
 function formatarReal(valor) {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -14,69 +15,62 @@ function formatarReal(valor) {
   }).format(valor);
 }
 
-// ===== main =====
+// Copiar por ID com feedback no botão
+function copiarValorPorId(id, botao) {
+  const texto = document.getElementById(id).innerText;
+
+  navigator.clipboard.writeText(texto).then(() => {
+    botao.classList.add("copiado");
+    setTimeout(() => botao.classList.remove("copiado"), 1200);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("consultaForm");
-  const resultado = document.getElementById("resultado");
-  const historicoEl = document.getElementById("historico");
 
   const municipioInput = document.getElementById("municipioInput");
   const sugestoesEl = document.getElementById("sugestoes");
-  const autocompleteWrapper = municipioInput?.closest(".autocomplete");
+  const codigoHidden = document.getElementById("codigoMunicipio");
+  const ufHidden = document.getElementById("ufMunicipio");
 
-  // ✅ garante hidden inputs (se não existirem, cria)
-  let codigoHidden = document.getElementById("codigoMunicipio");
-  if (!codigoHidden) {
-    codigoHidden = document.createElement("input");
-    codigoHidden.type = "hidden";
-    codigoHidden.id = "codigoMunicipio";
-    form.appendChild(codigoHidden);
-  }
+  const resMunicipio = document.getElementById("res-municipio");
+  const resPeriodo = document.getElementById("res-periodo");
+  const valorFpm = document.getElementById("valor-fpm");
+  const valorRoyalties = document.getElementById("valor-royalties");
+  const valorTodos = document.getElementById("valor-todos");
 
-  let ufHidden = document.getElementById("ufMunicipio");
-  if (!ufHidden) {
-    ufHidden = document.createElement("input");
-    ufHidden.type = "hidden";
-    ufHidden.id = "ufMunicipio";
-    form.appendChild(ufHidden);
-  }
+  const historicoEl = document.getElementById("historico");
+  const statusEl = document.getElementById("status");
+  const btnConsultar = document.getElementById("btnConsultar");
 
-  // ✅ validação: se faltar algo essencial, mostra erro no console e não quebra tudo
-  if (!form || !resultado || !historicoEl || !municipioInput || !sugestoesEl || !autocompleteWrapper) {
-    console.error("ERRO: Elementos do autocomplete não encontrados. Confira IDs no index.html.", {
-      form: !!form,
-      resultado: !!resultado,
-      historicoEl: !!historicoEl,
-      municipioInput: !!municipioInput,
-      sugestoesEl: !!sugestoesEl,
-      autocompleteWrapper: !!autocompleteWrapper
-    });
-    return;
-  }
-
-  // ===== histórico =====
+  // ===== HISTÓRICO =====
   let historico = JSON.parse(localStorage.getItem("historico")) || [];
   renderHistorico();
 
-  // ===== funções autocomplete =====
-  function abrirSugestoes() {
-    sugestoesEl.style.display = "block";
+  function salvarNoHistorico(data) {
+    historico.unshift(data);
+    historico = historico.slice(0, 25);
+    localStorage.setItem("historico", JSON.stringify(historico));
+    renderHistorico();
   }
 
-  function fecharSugestoes() {
-    sugestoesEl.innerHTML = "";
-    sugestoesEl.style.display = "none";
+  function renderHistorico() {
+    historicoEl.innerHTML = "";
+
+    historico.forEach((item) => {
+      const li = document.createElement("li");
+      li.textContent = `${normalizarMunicipio(item.municipio)} | ${item.periodo}`;
+      li.title = "Clique para visualizar novamente";
+      li.addEventListener("click", () => renderResultado(item));
+      historicoEl.appendChild(li);
+    });
   }
 
-  // começa fechada
-  fecharSugestoes();
-
+  // ===== AUTOCOMPLETE =====
   let timeout = null;
 
   municipioInput.addEventListener("input", () => {
     clearTimeout(timeout);
-
-    // invalida seleção anterior ao digitar
     codigoHidden.value = "";
     ufHidden.value = "";
 
@@ -89,17 +83,10 @@ document.addEventListener("DOMContentLoaded", () => {
     timeout = setTimeout(async () => {
       try {
         const res = await fetch(`/municipios?q=${encodeURIComponent(termo)}`);
-        if (!res.ok) {
-          console.error("Erro /municipios:", res.status, res.statusText);
-          fecharSugestoes();
-          return;
-        }
-
         const dados = await res.json();
 
         sugestoesEl.innerHTML = "";
-
-        if (!Array.isArray(dados) || dados.length === 0) {
+        if (!dados || dados.length === 0) {
           fecharSugestoes();
           return;
         }
@@ -107,38 +94,40 @@ document.addEventListener("DOMContentLoaded", () => {
         dados.forEach((m) => {
           const li = document.createElement("li");
           li.textContent = `${m.municipio} (${m.uf})`;
-
           li.addEventListener("click", () => {
-            municipioInput.value = `${m.municipio} (${m.uf})`;
+            municipioInput.value = `${m.municipio} / ${m.uf}`;
             codigoHidden.value = m.codigo;
             ufHidden.value = m.uf;
             fecharSugestoes();
           });
-
           sugestoesEl.appendChild(li);
         });
 
-        abrirSugestoes();
+        sugestoesEl.style.display = "block";
       } catch (err) {
-        console.error("Erro ao buscar municípios:", err);
+        console.error(err);
         fecharSugestoes();
       }
     }, 250);
   });
 
-  // fecha ao clicar fora do bloco do autocomplete
+  function fecharSugestoes() {
+    sugestoesEl.innerHTML = "";
+    sugestoesEl.style.display = "none";
+  }
+
   document.addEventListener("click", (e) => {
-    if (!autocompleteWrapper.contains(e.target)) {
-      fecharSugestoes();
-    }
+    if (!e.target.closest(".autocomplete")) fecharSugestoes();
   });
 
-  // opcional: se clicar no input, reabre se já tiver sugestões carregadas
-  municipioInput.addEventListener("focus", () => {
-    if (sugestoesEl.children.length > 0) abrirSugestoes();
+  // ===== COPIAR =====
+  document.querySelectorAll("[data-copy]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      copiarValorPorId(btn.dataset.copy, btn);
+    });
   });
 
-  // ===== submit =====
+  // ===== SUBMIT =====
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -147,26 +136,25 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const dataInicioIso = document.getElementById("data_inicio").value;
-    const dataFimIso = document.getElementById("data_fim").value;
+    // STATUS ON
+    statusEl.classList.remove("hidden");
+    btnConsultar.disabled = true;
+    btnConsultar.classList.add("disabled");
 
-    const dataInicio = isoParaPonto(dataInicioIso);
-    const dataFim = isoParaPonto(dataFimIso);
-
-    if (!dataInicio || !dataFim) {
-      alert("Selecione corretamente as datas");
-      return;
-    }
+    // limpa valores enquanto consulta
+    resMunicipio.innerText = "Consultando…";
+    resPeriodo.innerText = "";
+    valorFpm.innerText = "—";
+    valorRoyalties.innerText = "—";
+    valorTodos.innerText = "—";
 
     const payload = {
-      codigo: parseInt(codigoHidden.value, 10),
+      codigo: Number(codigoHidden.value),
       nome: municipioInput.value,
       uf: ufHidden.value,
-      data_inicio: dataInicio,
-      data_fim: dataFim
+      data_inicio: isoParaPonto(document.getElementById("data_inicio").value),
+      data_fim: isoParaPonto(document.getElementById("data_fim").value)
     };
-
-    resultado.textContent = "Consultando...";
 
     try {
       const res = await fetch(API_URL, {
@@ -176,43 +164,31 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const data = await res.json();
-
-      resultado.innerHTML = `
-        <div><strong>Município:</strong> ${data.municipio}</div>
-        <div><strong>Período:</strong> ${data.periodo}</div>
-        <ul>
-          <li><strong>FPM:</strong> ${formatarReal(data.fpm)}</li>
-          <li><strong>Royalties:</strong> ${formatarReal(data.royalties)}</li>
-          <li><strong>Todos os Benefícios:</strong> ${formatarReal(data.todos)}</li>
-        </ul>
-      `;
-
-      historico.unshift(data);
-      localStorage.setItem("historico", JSON.stringify(historico));
-      renderHistorico();
+      renderResultado(data);
+      salvarNoHistorico(data);
     } catch (err) {
-      console.error("Erro ao consultar backend:", err);
-      resultado.textContent = "Erro ao consultar backend";
+      console.error(err);
+      resMunicipio.innerText = "Erro ao consultar.";
+    } finally {
+      // STATUS OFF
+      statusEl.classList.add("hidden");
+      btnConsultar.disabled = false;
+      btnConsultar.classList.remove("disabled");
     }
   });
 
-  function renderHistorico() {
-    historicoEl.innerHTML = "";
-    historico.forEach((item) => {
-      const li = document.createElement("li");
-      li.textContent = `${item.municipio} | ${item.periodo}`;
-      li.addEventListener("click", () => {
-        resultado.innerHTML = `
-          <div><strong>Município:</strong> ${item.municipio}</div>
-          <div><strong>Período:</strong> ${item.periodo}</div>
-          <ul>
-            <li><strong>FPM:</strong> ${formatarReal(item.fpm)}</li>
-            <li><strong>Royalties:</strong> ${formatarReal(item.royalties)}</li>
-            <li><strong>Todos os Benefícios:</strong> ${formatarReal(item.todos)}</li>
-          </ul>
-        `;
-      });
-      historicoEl.appendChild(li);
-    });
+  // ===== Helpers =====
+  function normalizarMunicipio(municipio) {
+    const partes = municipio.replace(" - ", " / ").split(" / ");
+    return `${partes[0]} / ${partes[1]}`;
+  }
+
+  function renderResultado(data) {
+    resMunicipio.innerText = normalizarMunicipio(data.municipio);
+    resPeriodo.innerText = data.periodo;
+
+    valorFpm.innerText = formatarReal(data.fpm);
+    valorRoyalties.innerText = formatarReal(data.royalties);
+    valorTodos.innerText = formatarReal(data.todos);
   }
 });
