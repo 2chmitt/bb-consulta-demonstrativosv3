@@ -1,16 +1,14 @@
-/* ===== BASE ===== */
 body {
   margin: 0;
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: #f5f6f8;
-  color: #111;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
 }
 
-/* ===== TOPO ===== */
+/* HEADER */
 .topbar {
-  background: linear-gradient(90deg, #001a4d, #0033a0);
-  padding: 18px 30px;
+  background: linear-gradient(90deg, #000814, #003566);
   color: #fff;
+  padding: 20px;
 }
 
 .topbar-content {
@@ -19,134 +17,142 @@ body {
   gap: 15px;
 }
 
-.logo {
-  height: 38px;
-}
+.logo { height: 40px; }
 
-/* ===== LAYOUT ===== */
+/* LAYOUT */
 .page {
-  max-width: 920px;
+  max-width: 950px;
   margin: 40px auto;
   padding: 0 20px;
 }
 
-/* ===== CARDS ===== */
+/* CARDS */
 .card {
   background: #fff;
   border-radius: 10px;
   padding: 25px;
   margin-bottom: 30px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
 }
 
-.form-card {
-  border-left: 6px solid #0033a0;
-}
+.form-card { border-left: 6px solid #003566; }
+.resultado-card { border-left: 6px solid #000; }
+.historico-card { border-left: 6px solid #003566; }
 
-.resultado-card {
-  border-left: 6px solid #000;
-}
-
-.historico-card {
-  border-left: 6px solid #0033a0;
-}
-
-/* ===== FORM ===== */
+/* FORM */
 .field {
   display: flex;
   flex-direction: column;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 label {
-  font-size: 13px;
+  font-weight: 700;
   margin-bottom: 6px;
-  font-weight: 600;
-  color: #333;
 }
 
 input {
-  padding: 10px 12px;
+  padding: 10px;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid #cfd6e4;
   font-size: 14px;
+  outline: none;
 }
 
 input:focus {
-  outline: none;
-  border-color: #0033a0;
+  border-color: #003566;
+  box-shadow: 0 0 0 3px rgba(0, 53, 102, 0.12);
 }
 
-/* ===== BOTÃO ===== */
 .actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
 }
 
 button {
   background: #0033a0;
   color: #fff;
   border: none;
-  padding: 10px 22px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #001f66;
-}
-
-/* ===== RESULTADO ===== */
-.resultado-card ul {
-  margin-top: 15px;
-  padding-left: 20px;
-}
-
-.resultado-card li {
-  margin-bottom: 6px;
-}
-
-/* ===== HISTÓRICO ===== */
-.historico-card ul {
-  list-style: none;
-  padding: 0;
-  margin-top: 10px;
-}
-
-.historico-card li {
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  background: #f0f3fa;
+  padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
+  font-weight: 700;
+}
+
+button.disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* STATUS */
+.status {
+  margin-top: 12px;
+  color: #003566;
+  font-weight: 700;
+}
+
+.hidden { display: none; }
+
+/* RESULTADO */
+.linha-info { margin-bottom: 10px; }
+
+/* BLOCO VALOR (alinhamento perfeito) */
+.bloco-valor {
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: background 0.2s, transform 0.1s;
+  justify-content: space-between;
+  background: #eef2f7;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-top: 14px;
 }
 
-.historico-card li::before {
-  content: "🔎";
+/* esquerda: chave + valor alinhados */
+.bloco-left {
+  display: grid;
+  grid-template-columns: 120px 1fr; /* 🔥 garante alinhamento */
+  align-items: center;
+  column-gap: 14px;
 }
 
-.historico-card li:hover {
-  background: #dbe5ff;
-  transform: translateX(4px);
+/* "fpm:" "royalties:" "todos:" */
+.chave {
+  font-weight: 800;
+  text-transform: lowercase;
 }
 
-.hint {
-  font-size: 12px;
-  color: #555;
-  font-weight: normal;
+/* valor */
+.valor {
+  font-size: 20px;
+  font-weight: 800;
+  text-align: left;
 }
 
-/* ===== AUTOCOMPLETE ===== */
-.autocomplete {
-  position: relative;
+/* botão copiar */
+.btn-copy {
+  background: #0033a0;
+  padding: 8px 14px;
+  border-radius: 7px;
+  white-space: nowrap;
 }
+
+.btn-copy.copiado {
+  background: #2ecc71;
+}
+
+/* HISTÓRICO */
+.historico-card li {
+  background: #eef2f7;
+  padding: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.historico-card li:hover { background: #dce6f5; }
+
+/* AUTOCOMPLETE */
+.autocomplete { position: relative; }
 
 .sugestoes {
   position: absolute;
@@ -154,11 +160,12 @@ button:hover {
   left: 0;
   right: 0;
   background: #fff;
-  border: 1px solid #ccc;
-  border-top: none;
-  max-height: 220px;
+  border: 1px solid #cfd6e4;
+  border-radius: 6px;
+  max-height: 240px;
   overflow-y: auto;
   z-index: 20;
+  display: none;
 }
 
 .sugestoes li {
@@ -166,11 +173,9 @@ button:hover {
   cursor: pointer;
 }
 
-.sugestoes li:hover {
-  background: #e8efff;
-}
+.sugestoes li:hover { background: #dde7f5; }
 
-/* ===== FOOTER ===== */
+/* FOOTER */
 .footer {
   text-align: center;
   padding: 20px;
