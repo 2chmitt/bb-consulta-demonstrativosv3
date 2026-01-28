@@ -27,7 +27,7 @@ app.add_middleware(
 # PATHS
 # =========================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FRONTEND_DIR = os.path.join(BASE_DIR, "Frontend")
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 MUNICIPIOS_PATH = os.path.join(BASE_DIR, "municipios.json")
 
 # =========================
@@ -159,3 +159,4 @@ def consultar(consulta: Consulta):
         "royalties": round(royalties, 2),
         "todos": round(todos, 2)
     }
+
