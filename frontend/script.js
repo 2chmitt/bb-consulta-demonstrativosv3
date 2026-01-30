@@ -1,13 +1,13 @@
 const API_URL = "/consulta";
 
-// YYYY-MM-DD → DD.MM.AAAA
+/* ===== Utils ===== */
+
 function isoParaPonto(dataIso) {
   if (!dataIso) return "";
   const [ano, mes, dia] = dataIso.split("-");
   return `${dia}.${mes}.${ano}`;
 }
 
-// Número → R$
 function formatarReal(valor) {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -15,17 +15,27 @@ function formatarReal(valor) {
   }).format(valor);
 }
 
-// Copiar por ID com feedback no botão
-function copiarValorPorId(id, botao) {
-  const texto = document.getElementById(id).innerText;
+function formatarRaw(valor) {
+  return Number(valor).toFixed(2);
+}
 
+function copiarTexto(texto, botao) {
   navigator.clipboard.writeText(texto).then(() => {
     botao.classList.add("copiado");
     setTimeout(() => botao.classList.remove("copiado"), 1200);
   });
 }
 
+function normalizarMunicipio(municipio) {
+  // garante APENAS "NOME / UF"
+  const partes = municipio.replace(" - ", " / ").split(" / ");
+  return `${partes[0]} / ${partes[1]}`;
+}
+
+/* ===== DOM READY ===== */
+
 document.addEventListener("DOMContentLoaded", () => {
+
   const form = document.getElementById("consultaForm");
 
   const municipioInput = document.getElementById("municipioInput");
@@ -35,17 +45,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const resMunicipio = document.getElementById("res-municipio");
   const resPeriodo = document.getElementById("res-periodo");
+
   const valorFpm = document.getElementById("valor-fpm");
   const valorRoyalties = document.getElementById("valor-royalties");
   const valorTodos = document.getElementById("valor-todos");
 
-  const historicoEl = document.getElementById("historico");
   const statusEl = document.getElementById("status");
   const btnConsultar = document.getElementById("btnConsultar");
 
-  // ===== HISTÓRICO =====
+  const historicoEl = document.getElementById("historico");
+
   let historico = JSON.parse(localStorage.getItem("historico")) || [];
+  let cacheValores = {}; // <-- mantém o "valor atual da tela"
+
   renderHistorico();
+
+  /* ===== HISTÓRICO ===== */
 
   function salvarNoHistorico(data) {
     historico.unshift(data);
@@ -56,17 +71,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderHistorico() {
     historicoEl.innerHTML = "";
-
-    historico.forEach((item) => {
+    historico.forEach(item => {
       const li = document.createElement("li");
       li.textContent = `${normalizarMunicipio(item.municipio)} | ${item.periodo}`;
-      li.title = "Clique para visualizar novamente";
-      li.addEventListener("click", () => renderResultado(item));
+      li.addEventListener("click", () => renderResultado(item)); // <-- renderResultado vai atualizar cacheValores agora
       historicoEl.appendChild(li);
     });
   }
 
-  // ===== AUTOCOMPLETE =====
+  /* ===== AUTOCOMPLETE ===== */
+
   let timeout = null;
 
   municipioInput.addEventListener("input", () => {
@@ -81,33 +95,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     timeout = setTimeout(async () => {
-      try {
-        const res = await fetch(`/municipios?q=${encodeURIComponent(termo)}`);
-        const dados = await res.json();
+      const res = await fetch(`/municipios?q=${encodeURIComponent(termo)}`);
+      const dados = await res.json();
 
-        sugestoesEl.innerHTML = "";
-        if (!dados || dados.length === 0) {
-          fecharSugestoes();
-          return;
-        }
-
-        dados.forEach((m) => {
-          const li = document.createElement("li");
-          li.textContent = `${m.municipio} (${m.uf})`;
-          li.addEventListener("click", () => {
-            municipioInput.value = `${m.municipio} / ${m.uf}`;
-            codigoHidden.value = m.codigo;
-            ufHidden.value = m.uf;
-            fecharSugestoes();
-          });
-          sugestoesEl.appendChild(li);
-        });
-
-        sugestoesEl.style.display = "block";
-      } catch (err) {
-        console.error(err);
+      sugestoesEl.innerHTML = "";
+      if (!dados || dados.length === 0) {
         fecharSugestoes();
+        return;
       }
+
+      dados.forEach(m => {
+        const li = document.createElement("li");
+        li.textContent = `${m.municipio} (${m.uf})`;
+        li.addEventListener("click", () => {
+          municipioInput.value = `${m.municipio} / ${m.uf}`;
+          codigoHidden.value = m.codigo;
+          ufHidden.value = m.uf;
+          fecharSugestoes();
+        });
+        sugestoesEl.appendChild(li);
+      });
+
+      sugestoesEl.style.display = "block";
     }, 250);
   });
 
@@ -116,32 +125,41 @@ document.addEventListener("DOMContentLoaded", () => {
     sugestoesEl.style.display = "none";
   }
 
-  document.addEventListener("click", (e) => {
+  document.addEventListener("click", e => {
     if (!e.target.closest(".autocomplete")) fecharSugestoes();
   });
 
-  // ===== COPIAR =====
-  document.querySelectorAll("[data-copy]").forEach((btn) => {
+  /* ===== BOTÕES COPIAR ===== */
+
+  document.querySelectorAll(".btn-copy").forEach(btn => {
     btn.addEventListener("click", () => {
-      copiarValorPorId(btn.dataset.copy, btn);
+      const tipo = btn.dataset.copy;
+
+      // 🔥 agora sempre copia o "valor atual da tela"
+      if (tipo === "fpm-raw") copiarTexto(formatarRaw(cacheValores.fpm), btn);
+      if (tipo === "fpm-brl") copiarTexto(formatarReal(cacheValores.fpm), btn);
+
+      if (tipo === "royalties-raw") copiarTexto(formatarRaw(cacheValores.royalties), btn);
+      if (tipo === "royalties-brl") copiarTexto(formatarReal(cacheValores.royalties), btn);
+
+      if (tipo === "todos-raw") copiarTexto(formatarRaw(cacheValores.todos), btn);
+      if (tipo === "todos-brl") copiarTexto(formatarReal(cacheValores.todos), btn);
     });
   });
 
-  // ===== SUBMIT =====
-  form.addEventListener("submit", async (e) => {
+  /* ===== SUBMIT ===== */
+
+  form.addEventListener("submit", async e => {
     e.preventDefault();
 
     if (!codigoHidden.value) {
-      alert("Selecione um município da lista");
+      alert("Selecione um município");
       return;
     }
 
-    // STATUS ON
     statusEl.classList.remove("hidden");
     btnConsultar.disabled = true;
-    btnConsultar.classList.add("disabled");
 
-    // limpa valores enquanto consulta
     resMunicipio.innerText = "Consultando…";
     resPeriodo.innerText = "";
     valorFpm.innerText = "—";
@@ -164,26 +182,25 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const data = await res.json();
+
       renderResultado(data);
       salvarNoHistorico(data);
-    } catch (err) {
-      console.error(err);
-      resMunicipio.innerText = "Erro ao consultar.";
+
     } finally {
-      // STATUS OFF
       statusEl.classList.add("hidden");
       btnConsultar.disabled = false;
-      btnConsultar.classList.remove("disabled");
     }
   });
 
-  // ===== Helpers =====
-  function normalizarMunicipio(municipio) {
-    const partes = municipio.replace(" - ", " / ").split(" / ");
-    return `${partes[0]} / ${partes[1]}`;
-  }
-
+  /* ===== RENDER RESULTADO ===== */
   function renderResultado(data) {
+    // ✅ atualização crítica: cacheValores deve refletir O QUE ESTÁ NA TELA
+    cacheValores = {
+      fpm: data.fpm,
+      royalties: data.royalties,
+      todos: data.todos
+    };
+
     resMunicipio.innerText = normalizarMunicipio(data.municipio);
     resPeriodo.innerText = data.periodo;
 
@@ -191,4 +208,5 @@ document.addEventListener("DOMContentLoaded", () => {
     valorRoyalties.innerText = formatarReal(data.royalties);
     valorTodos.innerText = formatarReal(data.todos);
   }
+
 });
