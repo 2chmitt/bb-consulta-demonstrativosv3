@@ -2,11 +2,12 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <title>Demonstrativos do Gabriel Patinhos22</title>
+  <title>Demonstrativos do Técnico</title>
 
+  <!-- favicon -->
   <link rel="icon" type="image/png" href="/static/imagem1.png" />
   <link rel="apple-touch-icon" href="/static/imagem1.png" />
-  
+
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
@@ -14,19 +15,19 @@
 <header class="topbar">
   <div class="topbar-content">
     <img src="/static/imagem1.png" class="logo" alt="Logo" />
-    <h1>Demonstrativos da Equipe Técnica</h1>
+    <h1>Demonstrativos do GabrielPatinhos22</h1>
   </div>
 </header>
 
 <main class="page">
 
-  <!-- FORMULÁRIO -->
+  <!-- FORM -->
   <section class="card form-card">
     <form id="consultaForm">
 
       <div class="field autocomplete">
         <label>Município</label>
-        <input type="text" id="municipioInput" autocomplete="off" placeholder="Digite o nome do município..." />
+        <input type="text" id="municipioInput" autocomplete="off" />
         <ul id="sugestoes" class="sugestoes"></ul>
       </div>
 
@@ -47,7 +48,6 @@
         <button type="submit" id="btnConsultar">Consultar</button>
       </div>
 
-      <!-- STATUS -->
       <div id="status" class="status hidden">Consultando dados…</div>
     </form>
   </section>
@@ -66,28 +66,40 @@
       <span id="res-periodo">—</span>
     </div>
 
+    <!-- FPM -->
     <div class="bloco-valor">
       <div class="bloco-left">
         <span class="chave">fpm:</span>
         <span id="valor-fpm" class="valor">—</span>
       </div>
-      <button class="btn-copy" data-copy="valor-fpm">📋 Copiar</button>
+      <div class="acoes">
+        <button class="btn-copy" data-copy="fpm-raw"> 📋 </button>
+        <button class="btn-copy" data-copy="fpm-brl"> 💰 </button>
+      </div>
     </div>
 
+    <!-- ROYALTIES -->
     <div class="bloco-valor">
       <div class="bloco-left">
         <span class="chave">royalties:</span>
         <span id="valor-royalties" class="valor">—</span>
       </div>
-      <button class="btn-copy" data-copy="valor-royalties">📋 Copiar</button>
+      <div class="acoes">
+        <button class="btn-copy" data-copy="royalties-raw"> 📋 </button>
+        <button class="btn-copy" data-copy="royalties-brl"> 💰 </button>
+      </div>
     </div>
 
+    <!-- TODOS -->
     <div class="bloco-valor">
       <div class="bloco-left">
         <span class="chave">todos:</span>
         <span id="valor-todos" class="valor">—</span>
       </div>
-      <button class="btn-copy" data-copy="valor-todos">📋 Copiar</button>
+      <div class="acoes">
+        <button class="btn-copy" data-copy="todos-raw"> 📋 </button>
+        <button class="btn-copy" data-copy="todos-brl"> 💰 </button>
+      </div>
     </div>
 
   </section>
@@ -107,4 +119,3 @@
 <script src="/static/script.js"></script>
 </body>
 </html>
-
