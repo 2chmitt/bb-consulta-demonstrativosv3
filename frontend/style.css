@@ -175,6 +175,28 @@ button.disabled {
 
 .sugestoes li:hover { background: #dde7f5; }
 
+/* mantém TODO o CSS anterior */
+
+.acoes {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-copy {
+  background: #0033a0;
+  color: #fff;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.btn-copy.copiado {
+  background: #2ecc71;
+}
+
 /* FOOTER */
 .footer {
   text-align: center;
