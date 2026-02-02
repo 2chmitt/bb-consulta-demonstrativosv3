@@ -16,8 +16,12 @@ function formatarReal(valor) {
 }
 
 function formatarRaw(valor) {
-  return Number(valor).toFixed(2);
+  return new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(valor);
 }
+
 
 function copiarTexto(texto, botao) {
   navigator.clipboard.writeText(texto).then(() => {
